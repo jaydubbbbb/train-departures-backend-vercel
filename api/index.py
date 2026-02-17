@@ -86,7 +86,7 @@ if not REDIS_ENABLED:
     print("  Falling back to no-cache mode")
 
 # Cache TTLs
-TOKEN_CACHE_TTL = 300  # 5 minutes
+TOKEN_CACHE_TTL = 120  # 2 minutes (reduced to prevent 401 errors)
 DEPARTURE_CACHE_TTL = 30  # 30 seconds
 
 def get_cached_tokens():
@@ -101,7 +101,7 @@ def get_cached_tokens():
             # Verify timestamp is recent
             cache_time = datetime.fromisoformat(tokens.get('timestamp', ''))
             age = (datetime.now() - cache_time).total_seconds()
-            if age < TOKEN_CACHE_TTL:
+            if age < TOKEN_CACHE_TTL:  # Now 120 seconds instead of 300
                 print(f"✓ Using cached tokens (age: {int(age)}s)")
                 return tokens
     except Exception as e:
