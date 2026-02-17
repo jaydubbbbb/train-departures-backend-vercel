@@ -2,5 +2,3 @@ flask
 flask-cors
 requests
 beautifulsoup4
-redis
-upstash-redis
