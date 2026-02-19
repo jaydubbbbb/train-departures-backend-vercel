@@ -95,7 +95,7 @@ def calculate_minutes_until(depart_time_str):
         print(f"Error calculating time: {e}")
         return None
 
-def fetch_all_departures(station_id='133', tokens=None):
+def fetch_all_departures(station_id='177', tokens=None):
     """Fetch all departures for specified station"""
     try:
         # Get fresh tokens if not provided
@@ -255,8 +255,8 @@ def fetch_all_departures(station_id='133', tokens=None):
 def get_departures():
     """Get all departures for specified station - NO CACHING (serverless)"""
     try:
-        # Get station_id from query parameter, default to 133 (Queens Park)
-        station_id = request.args.get('station_id', '133')
+        # Get station_id from query parameter, default to 177 (Elizabeth Quay)
+        station_id = request.args.get('station_id', '177')
         
         print("=" * 50)
         print(f"Fetching departures for station {station_id}...")
