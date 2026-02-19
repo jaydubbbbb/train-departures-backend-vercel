@@ -186,8 +186,10 @@ def fetch_all_departures(station_id='133', tokens=None):
                 
                 # Get real-time info
                 real_time = trip.get('RealTimeInfo', {})
-                series = summary.get('RealTimeInfo', {}).get('Series', 'W')
-                num_cars = summary.get('RealTimeInfo', {}).get('NumCars', '')
+                summary_real_time = summary.get('RealTimeInfo', {})
+                series = summary_real_time.get('Series', 'W')
+                num_cars = summary_real_time.get('NumCars', '')
+                fleet_number = summary_real_time.get('FleetNumber', '')
                 
                 # Get scheduled and estimated times
                 scheduled_time = trip.get('DepartTime', '')
@@ -230,7 +232,8 @@ def fetch_all_departures(station_id='133', tokens=None):
                     'stops': stops,
                     'route': route_name,
                     'route_code': display_route_code,
-                    'direction': direction
+                    'direction': direction,
+                    'fleetNumber': fleet_number
                 })
                 
                 delay_info = f" ({delay_status})" if delay_status else ""
