@@ -25,7 +25,7 @@ except ImportError:
 
 # Transperth URLs
 LIVE_TIMES_URL = "https://www.transperth.wa.gov.au/Timetables/Live-Train-Times"
-API_URL = "https://www.transperth.wa.gov.au/API/SilverRailRestService/SilverRailService/GetStopTimetable"
+API_URL = "https://www.transperth.wa.gov.au/API/SilverRailRestService/SilverRailService/GetStopTimetableAsync"
 
 def fetch_page_tokens():
     """Fetch the verification token and other required values from the page"""
