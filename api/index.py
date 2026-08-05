@@ -75,6 +75,17 @@ def fetch_page_tokens():
         print(f"Error fetching tokens: {e}")
         return None
 
+def safe_get(d, key, default=None):
+    """Like dict.get, but also falls back to `default` when the key exists
+    but its value is explicitly None (which plain .get(key, default) does NOT do).
+    Transperth's API sometimes returns explicit nulls (e.g. RealTimeInfo, Summary,
+    StopTimetableStop) for trips that currently have no real-time data, which is
+    what was causing 'NoneType' object has no attribute 'get' errors."""
+    if default is None:
+        default = {}
+    value = d.get(key, default) if d else default
+    return value if value is not None else default
+
 def calculate_minutes_until(depart_time_str):
     """Calculate minutes until departure from ISO format time"""
     try:
@@ -165,12 +176,12 @@ def fetch_all_departures(station_id='177', tokens=None):
         for trip in trips:
             try:
                 # Extract platform number from stop name
-                stop_name = trip.get('StopTimetableStop', {}).get('Name', '')
+                stop_name = safe_get(trip, 'StopTimetableStop').get('Name', '')
                 platform_match = re.search(r'Platform\s+(\d+)', stop_name)
                 platform = platform_match.group(1) if platform_match else '?'
                 
                 # Get destination
-                summary = trip.get('Summary', {})
+                summary = safe_get(trip, 'Summary')
                 headsign = summary.get('Headsign', '')
                 direction = summary.get('Direction', '0')  # 0 = To Perth, 1 = From Perth
                 
@@ -185,8 +196,8 @@ def fetch_all_departures(station_id='177', tokens=None):
                 display_route_code = trip.get('DisplayRouteCode', '')
                 
                 # Get real-time info
-                real_time = trip.get('RealTimeInfo', {})
-                summary_real_time = summary.get('RealTimeInfo', {})
+                real_time = safe_get(trip, 'RealTimeInfo')
+                summary_real_time = safe_get(summary, 'RealTimeInfo')
                 series = summary_real_time.get('Series', 'W')
                 num_cars = summary_real_time.get('NumCars', '')
                 fleet_number = summary_real_time.get('FleetNumber', '')
@@ -241,6 +252,17 @@ def fetch_all_departures(station_id='177', tokens=None):
                 
             except Exception as e:
                 print(f"Error parsing trip: {e}")
+                # Log which top-level fields were null/missing to help pinpoint
+                # API shape changes for specific lines/trips.
+                try:
+                    null_fields = [k for k in (
+                        'StopTimetableStop', 'Summary', 'RealTimeInfo',
+                        'DisplayTripTitle', 'DepartTime'
+                    ) if trip.get(k) is None]
+                    print(f"  Trip fields that were null/missing: {null_fields}")
+                    print(f"  Raw trip payload: {trip}")
+                except Exception as log_err:
+                    print(f"  (failed to log trip diagnostics: {log_err})")
                 continue
         
         return departures
